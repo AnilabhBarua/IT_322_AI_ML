@@ -1,0 +1,97 @@
+Linear model without py lib
+# Training data
+x_data = [1.0, 2.0, 3.0]
+y_data = [3.0, 6.0, 9.0]
+
+# Initial weight
+w = 1.0
+
+# Model prediction
+def forward(x):
+    return x * w
+
+# Loss function (Mean Squared Error)
+def loss(x, y):
+    y_pred = forward(x)
+    return (y_pred - y) ** 2
+
+# Gradient of loss w.r.t w
+def gradient(x, y):
+    return 2 * x * (forward(x) - y)
+
+# Before training prediction
+print("Prediction (before training)", 5, forward(5))
+
+# Training loop
+for epoch in range(20):                        #This loop trains the model for 10 iterations (called epochs).
+    for x_val, y_val in zip(x_data, y_data):
+        grad = gradient(x_val, y_val)
+        w = w - 0.01 * grad
+        # print("\tgrad:", x_val, y_val, round(grad, 2))
+        l = loss(x_val, y_val)
+    print("Progress:", epoch, "w =", round(w, 2), "loss =", round(l, 2))
+
+# After training prediction
+print("Predicted Score (after training)", "4 hours of studying:", forward(5))
+
+
+
+////////////////////////////////////////////////////////
+Univariate Linear Regression with Gradient Descent
+
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load data
+data = pd.read_csv("ex1data1.txt", header=None)
+X = data.iloc[:, 0].values
+Y = data.iloc[:, 1].values
+m = len(Y)  # Number of training examples
+
+# Reshape for matrix operations
+X = X[:, np.newaxis]
+Y = Y[:, np.newaxis]
+
+# Add intercept term (column of ones)
+ones = np.ones((m, 1))
+X = np.hstack((ones, X))
+
+# Initialize parameters
+theta = np.zeros((2, 1))  # Instead of np.zeroes
+
+# Hyperparameters
+epochs = 1500
+alpha = 0.01
+
+# Cost function
+def computeCost(X, Y, theta):
+    predictions = np.dot(X, theta)
+    errors = predictions - Y
+    return np.sum(errors ** 2) / (2 * m)
+
+# Gradient descent function
+def gradientDescent(X, Y, theta, alpha, iterations):
+    for _ in range(iterations):
+        predictions = np.dot(X, theta)
+        errors = predictions - Y
+        gradient = np.dot(X.T, errors)
+        theta -= (alpha / m) * gradient
+    return theta
+
+# Compute initial cost
+J = computeCost(X, Y, theta)
+print("Initial cost:", J)
+
+# Train model
+theta = gradientDescent(X, Y, theta, alpha, epochs)
+print("Learned theta:", theta)
+
+# Plotting
+plt.scatter(X[:, 1], Y, label="Training data")
+plt.plot(X[:, 1], np.dot(X, theta), color='red', label="Linear regression")
+plt.xlabel("Population of City in 10,000s")
+plt.ylabel("Profit in $10,000s")
+plt.legend()
+plt.show()
